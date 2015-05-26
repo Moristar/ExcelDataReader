@@ -189,6 +189,8 @@ namespace Excel
 			
 		}
 
+		protected bool _IgnoreFormulaValue = true;
+
 		private bool ReadSheetRow(XlsxWorksheet sheet)
 		{
 			if (null == _xmlReader) return false;
@@ -223,6 +225,7 @@ namespace Excel
 					_emptyRowCount = rowIndex - _depth - 1;
 				}
 				bool hasValue = false;
+				bool hasFormula = false;
 				string a_s = String.Empty;
 				string a_t = String.Empty;
 				string a_r = String.Empty;
@@ -236,56 +239,60 @@ namespace Excel
                     if (_xmlReader.NodeType == XmlNodeType.Element)
                     {
                         hasValue = false;
+						hasFormula = false;
 
-                        if (_xmlReader.LocalName == XlsxWorksheet.N_c)
-                        {
-                            a_s = _xmlReader.GetAttribute(XlsxWorksheet.A_s);
-                            a_t = _xmlReader.GetAttribute(XlsxWorksheet.A_t);
-                            a_r = _xmlReader.GetAttribute(XlsxWorksheet.A_r);
-                            XlsxDimension.XlsxDim(a_r, out col, out row);
-                        }
-                        else if (_xmlReader.LocalName == XlsxWorksheet.N_v || _xmlReader.LocalName == XlsxWorksheet.N_t)
-                        {
-                            hasValue = true;
-                        }
+						if (_xmlReader.LocalName == XlsxWorksheet.N_c)
+						{
+							a_s = _xmlReader.GetAttribute(XlsxWorksheet.A_s);
+							a_t = _xmlReader.GetAttribute(XlsxWorksheet.A_t);
+							a_r = _xmlReader.GetAttribute(XlsxWorksheet.A_r);
+							XlsxDimension.XlsxDim(a_r, out col, out row);
+						}
+						else if (_xmlReader.LocalName == XlsxWorksheet.N_v || _xmlReader.LocalName == XlsxWorksheet.N_t)
+							hasValue = true;
+						else if (_xmlReader.LocalName == XlsxWorksheet.N_f)
+							hasFormula = true;
                     }
 
-                    if (_xmlReader.NodeType == XmlNodeType.Text && hasValue)
+                    if (_xmlReader.NodeType == XmlNodeType.Text && (hasValue || hasFormula))
                     {
-                    	double number;
-                        object o = _xmlReader.Value;
+						if (col - 1 >= _cellsValues.Length || _cellsValues[col - 1] != null)
+							continue;
+
+						double number;
+                        object objValue = _xmlReader.Value;
 
 	                    var style = NumberStyles.Any;
 						var culture = CultureInfo.InvariantCulture;
                         
-                        if (double.TryParse(o.ToString(), style, culture, out number))
-                            o = number;
+                        if (double.TryParse(objValue.ToString(), style, culture, out number))
+                            objValue = number;
                         	
                         if (null != a_t && a_t == XlsxWorksheet.A_s) //if string
                         {
-                            o = Helpers.ConvertEscapeChars(_workbook.SST[int.Parse(o.ToString())]);
+                            objValue = Helpers.ConvertEscapeChars(_workbook.SST[int.Parse(objValue.ToString())]);
                         } // Requested change 4: missing (it appears that if should be else if)
                         else if (null != a_t && a_t == XlsxWorksheet.N_inlineStr) //if string inline
                         {
-                            o = Helpers.ConvertEscapeChars(o.ToString());
+                            objValue = Helpers.ConvertEscapeChars(objValue.ToString());
                         }
                         else if (a_t == "b") //boolean
 						{
-							o = _xmlReader.Value == "1";
+							objValue = _xmlReader.Value == "1";
 						}  
                         else if (null != a_s) //if something else
                         {
                             XlsxXf xf = _workbook.Styles.CellXfs[int.Parse(a_s)];
-                            if (o != null && o.ToString() != string.Empty && IsDateTimeStyle(xf.NumFmtId))
-                                o = Helpers.ConvertFromOATime(number);
+                            if (objValue != null && objValue.ToString() != string.Empty && IsDateTimeStyle(xf.NumFmtId))
+                                objValue = Helpers.ConvertFromOATime(number);
                             else if (xf.NumFmtId == 49)
-                                o = o.ToString();
+                                objValue = objValue.ToString();
                         }
-                                                
 
+						if (hasFormula)
+							objValue = "=" + objValue;
 
-                        if (col - 1 < _cellsValues.Length)
-                            _cellsValues[col - 1] = o;
+                        _cellsValues[col - 1] = objValue;
                     }
                 }
 

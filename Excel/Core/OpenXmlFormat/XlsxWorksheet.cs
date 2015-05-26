@@ -8,6 +8,7 @@ namespace ExcelDataReader.Portable.Core.OpenXmlFormat
 		public const string N_col = "col";
 		public const string N_c = "c"; //cell
 		public const string N_v = "v";
+		public const string N_f = "f"; //formula
 		public const string N_t = "t";
 		public const string A_ref = "ref";
 		public const string A_r = "r";
