@@ -314,6 +314,19 @@ namespace Excel
             get { return (ReadOption)portable.ReadOption; }
 		}
 
+		public bool IgnoreFormulaValue
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		#endregion
 	}
 

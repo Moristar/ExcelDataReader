@@ -41,18 +41,21 @@ namespace Excel
 		private string _namespaceUri;
 	    private Encoding defaultEncoding = Encoding.UTF8;
 
-	    #endregion
+		#endregion
+
+		public bool IgnoreFormulaValue { get; set; }
 
 		internal ExcelOpenXmlReader()
 		{
 			_isValid = true;
 			_isFirstRead = true;
 
+			IgnoreFormulaValue = false;
+
 			_defaultDateTimeStyles = new List<int>(new int[] 
 			{
 				14, 15, 16, 17, 18, 19, 20, 21, 22, 45, 46, 47
 			});
-
 		}
 
 		private void ReadGlobals()
@@ -189,8 +192,6 @@ namespace Excel
 			
 		}
 
-		protected bool _IgnoreFormulaValue = true;
-
 		private bool ReadSheetRow(XlsxWorksheet sheet)
 		{
 			if (null == _xmlReader) return false;
@@ -250,7 +251,7 @@ namespace Excel
 						}
 						else if (_xmlReader.LocalName == XlsxWorksheet.N_v || _xmlReader.LocalName == XlsxWorksheet.N_t)
 							hasValue = true;
-						else if (_xmlReader.LocalName == XlsxWorksheet.N_f)
+						else if (_xmlReader.LocalName == XlsxWorksheet.N_f && IgnoreFormulaValue)
 							hasFormula = true;
                     }
 

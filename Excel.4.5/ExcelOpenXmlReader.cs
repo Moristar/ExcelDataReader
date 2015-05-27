@@ -245,6 +245,19 @@ namespace Excel
 			get { throw new NotSupportedException(); }
 		}
 
+		public bool IgnoreFormulaValue
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		#endregion
 
 		#region Not Supported IDataRecord Members

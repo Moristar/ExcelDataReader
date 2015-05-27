@@ -9,6 +9,11 @@ namespace Excel
 	public interface IExcelDataReader : IDataReader
 	{
 		/// <summary>
+		/// Allows to control whether formulas in cell are read as calculated value (false) or as original formula (true). Default is false.
+		/// </summary>
+		bool IgnoreFormulaValue { get; set; }
+
+		/// <summary>
 		/// Initializes the instance with specified file stream.
 		/// </summary>
 		/// <param name="fileStream">The file stream.</param>

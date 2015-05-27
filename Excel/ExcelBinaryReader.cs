@@ -1252,6 +1252,19 @@ namespace Excel
 			get { return m_ReadOption; }
 		}
 
+		public bool IgnoreFormulaValue
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		#endregion
 	}
 
